@@ -1,34 +1,46 @@
-#!/usr/bin/env bash
-#Bash script that creates a subprocess
-/lib/lsb/init-functions
+#!/bin/bash
 
-PIDFILE=/var/run/my_process.pid
+# Check the argument
+if [ $# -ne 1 ]; then
+  echo "Usage: manage_my_process {start|stop|restart}"
+  exit 1
+fi
 
-start() {
+# Get the argument
+action=$1
+
+# Check the action
+case $action in
+  start)
+    # Start the process
+    echo "Starting manage_my_process..."
     ./manage_my_process &
-    echo "$!" > "$PIDFILE"
-}
+    pid=$!
+    echo $pid > /var/run/my_process.pid
+    echo "manage_my_process started"
+    ;;
+  stop)
+    # Stop the process
+    echo "Stopping manage_my_process..."
+    pid=$(cat /var/run/my_process.pid)
+    kill $pid
+    rm -f /var/run/my_process.pid
+    echo "manage_my_process stopped"
+    ;;
+  restart)
+    # Stop the process
+    echo "Restarting manage_my_process..."
+    pid=$(cat /var/run/my_process.pid)
+    kill $pid
+    rm -f /var/run/my_process.pid
 
-stop() {
-    sudo kill -15 "$(cat "$PIDFILE")" && rm -f "$PIDFILE"
-}
-
-case "$1" in 
-    start)
-       start
-       echo "manage_my_process started"
-       ;;
-    stop)
-       stop
-       echo "manage_my_process stopped"
-       ;;
-    restart)
-       stop
-       start
-       echo "manage_my_process restarted"
-       ;;
-    *)
-       echo "Usage: manage_my_process {start|stop|restart}"
+    # Start the process
+    ./manage_my_process &
+    pid=$!
+    echo $pid > /var/run/my_process.pid
+    echo "manage_my_process restarted"
+    ;;
+  *)
+    echo "Unknown action: $action"
+    exit 1
 esac
-
-exit 0
