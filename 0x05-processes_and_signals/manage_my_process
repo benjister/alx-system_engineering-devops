@@ -1,0 +1,24 @@
+#!/bin/bash
+
+case "$1" in
+  start)
+    echo "Starting manage_my_process"
+    while true
+    do
+      echo "I am alive!" >> /tmp/my_process
+      sleep 2
+    done &
+    echo $! > /var/run/my_process.pid
+    ;;
+  stop)
+    echo "Stopping manage_my_process"
+    kill $(cat /var/run/my_process.pid)
+    rm /var/run/my_process.pid
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+    ;;
+esac
+
+exit 0
